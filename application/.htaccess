@@ -1,7 +1,7 @@
-RewriteEngine On
-RewriteBase /
-
-# Route all requests to index.php
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php/$1 [L]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /uas_pfswd/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php/$1 [L]
+</IfModule>

@@ -9,11 +9,11 @@ class Profile extends CI_Controller {
     }
 
     public function index() {
-        $user_id = $this->session->userdata('user_id');
+        $freelancer_id = $this->session->userdata('freelancer_id');
         
-        if ($user_id) {
+        if ($freelancer_id) {
             // Ambil data pengguna berdasarkan ID
-            $data['user'] = $this->User_model->get_user_by_id($user_id);
+            $data['user'] = $this->User_model->get_user_by_id($freelancer_id);
             $this->load->view('profile', $data);
         } else {
             redirect('signin'); // Jika pengguna belum login, redirect ke halaman signin
@@ -22,11 +22,11 @@ class Profile extends CI_Controller {
 
     // Fungsi untuk menampilkan form edit profil
     public function edit() {
-        $user_id = $this->session->userdata('user_id');
+        $freelancer_id = $this->session->userdata('freelancer_id');
         
-        if ($user_id) {
+        if ($freelancer_id) {
             // Ambil data pengguna
-            $data['user'] = $this->User_model->get_user_by_id($user_id);
+            $data['user'] = $this->User_model->get_user_by_id($freelancer_id);
 
             // Ambil daftar gambar yang ada di folder 'assets/images'
             $data['images'] = $this->_get_images_from_directory('assets/images');
@@ -54,9 +54,9 @@ class Profile extends CI_Controller {
     }
 
     public function update() {
-        $user_id = $this->session->userdata('user_id');
+        $freelancer_id = $this->session->userdata('freelancer_id');
         
-        if ($user_id) {
+        if ($freelancer_id) {
             // Ambil data dari form
             $name = $this->input->post('name');
             $email = $this->input->post('email');
@@ -73,7 +73,7 @@ class Profile extends CI_Controller {
             }
 
             // Lakukan update data pengguna
-            $updated = $this->User_model->update_user($user_id, $name, $email, $password, $profile_picture);
+            $updated = $this->User_model->update_user($freelancer_id, $name, $email, $password, $profile_picture);
     
             if ($updated) {
                 $this->session->set_flashdata('success', 'Profil berhasil diperbarui!');

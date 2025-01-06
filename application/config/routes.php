@@ -55,8 +55,9 @@ $route['translate_uri_dashes'] = FALSE;
 
 // Routing untuk halaman-halaman utama
 $route['home'] = 'home'; // Halaman Home
-$route['freelancer_dashboard'] = 'freelancer_dashboard';  // Halaman freelancer dashboard
-$route['client_dashboard'] = 'client_dashboard'; // Halaman Client Dashboard
+$route['freelancer_dashboard'] = 'freelancer_dashboard/index';
+  // Halaman freelancer dashboard
+$route['client_dashboard'] = 'client_dashboard/index'; // Halaman Client Dashboard
 $route['about'] = 'about'; // Halaman About
 
 // Routing untuk halaman Sign In dan Sign Up
@@ -69,3 +70,6 @@ $route['signin/login'] = 'signinpage/login'; // Proses login
 
 
 
+$route['freelancer_dashboard/ambil_pekerjaan'] = 'Freelancer_Dashboard/ambil_pekerjaan';
+$route['client_dashboard/inbox'] = 'client_dashboard/inbox';
+$route['freelancer_dashboard/inbox'] = 'freelancer_dashboard/inbox';

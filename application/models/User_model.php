@@ -23,7 +23,7 @@ class User_model extends CI_Model {
     }
 
     // Memperbarui data user berdasarkan ID (username, email, password, profile_picture)
-    public function update_user($user_id, $username, $email, $password, $profile_picture)
+    public function update_user($freelancer_id, $username, $email, $password, $profile_picture)
     {
         $data = [
             'username' => $username,
@@ -37,7 +37,7 @@ class User_model extends CI_Model {
         }
 
         // Menyimpan perubahan ke database
-        $this->db->where('id', $user_id);
+        $this->db->where('id', $freelancer_id);
         return $this->db->update('users', $data);
     }
 
@@ -62,10 +62,10 @@ class User_model extends CI_Model {
     }
 
     // Menyimpan atau memperbarui role user
-    public function update_user_role($user_id, $role)
+    public function update_user_role($freelancer_id, $role)
     {
         $data = ['role' => $role];  // Menyimpan role baru ke database
-        $this->db->where('id', $user_id);
+        $this->db->where('id', $freelancer_id);
         return $this->db->update('users', $data);  // Memperbarui data role di database
     }
 }

@@ -54,7 +54,7 @@ class SignInPage extends CI_Controller {
                 }
 
                 // Simpan informasi user ke session
-                $this->session->set_userdata('user_id', $user['id']);
+                $this->session->set_userdata('freelancer_id', $user['id']);
                 $this->session->set_userdata('username', $user['username']);
                 $this->session->set_userdata('role', $role);
 

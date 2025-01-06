@@ -59,7 +59,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <?php if ($this->session->userdata('user_id')): ?>
+                <?php if ($this->session->userdata('freelancer_id')): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= site_url('profile'); ?>">
                             <i class="bi bi-person-circle" style="font-size: 30px;"></i>
@@ -70,6 +70,8 @@
         </div>
     </div>
 </nav>
+
+
 
 <div class="container mt-5 profile-info">
     <h2>Profil Pengguna</h2>
