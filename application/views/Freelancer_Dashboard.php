@@ -70,7 +70,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <?php if ($this->session->userdata('user_id')): ?> <!-- Check if logged in -->
+                <?php if ($this->session->userdata('user_id')): ?>
                     <li class="nav-item d-flex align-items-center">
                         <span class="nav-link me-2">
                             Selamat datang kembali, <?= htmlspecialchars($this->session->userdata('username') ?? 'Guest'); ?>!
@@ -89,8 +89,8 @@
                         Akun Saya
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="<?= site_url('profile'); ?>">Profile</a></li>
-                    <li><a class="dropdown-item" href="<?= site_url('freelancer_dashboard/inbox'); ?>">Inbox</a></li>
+                        <li><a class="dropdown-item" href="<?= site_url('profile'); ?>">Profile</a></li>
+                        <li><a class="dropdown-item" href="<?= site_url('freelancer_dashboard/inbox'); ?>">Inbox</a></li>
                     </ul>
                 </li>
             </ul>
@@ -103,24 +103,39 @@
     <p class="section-intro">Temukan berbagai pekerjaan freelance dengan berbagai keahlian yang bisa Anda pilih.</p>
 
     <div class="card-columns">
-        <?php foreach ($pekerjaan as $job): ?>
-            <div class="card">
-                <img src="<?= base_url('assets/images/' . $job['image_url']); ?>" class="card-img-top" alt="<?= $job['title']; ?>">
-                <div class="card-body">
-                    <h5 class="card-title"><?= $job['title']; ?></h5>
-                    <p class="card-text"><?= substr($job['description'], 0, 100); ?>...</p>
+    <?php foreach ($pekerjaan as $job): ?>
+        <div class="card">
+            <img src="<?= base_url('assets/images/' . $job['image_url']); ?>" class="card-img-top" alt="<?= $job['title']; ?>">
+            <div class="card-body">
+                <h5 class="card-title"><?= $job['title']; ?></h5>
+                <p class="card-text"><?= substr($job['description'], 0, 100); ?>...</p>
+                <p><strong>Status:</strong> 
+                    <?php if ($job['status'] == 'closed'): ?>
+                        <span class="badge bg-danger">Closed</span> 
+                    <?php elseif ($job['status'] == 'completed'): ?>
+                        <span class="badge bg-secondary">Completed</span>
+                    <?php else: ?>
+                        <span class="badge bg-success">Open</span>
+                    <?php endif; ?>
+                </p>
+                
+                <?php if ($job['status'] == 'open'): ?>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#jobDetailsModal" 
                             data-job-id="<?= $job['id']; ?>"
                             data-job-title="<?= $job['title']; ?>"
                             data-job-description="<?= $job['description']; ?>"
                             data-job-client="<?= $job['username']; ?>"
-                            data-job-image="<?= $job['image_url']; ?>">
+                            data-job-status="<?= $job['status']; ?>">
                         Pelajari Lebih Lanjut
                     </button>
-                </div>
+                <?php else: ?>
+                    <button class="btn btn-secondary" disabled>Pekerjaan Ditutup</button>
+                <?php endif; ?>
             </div>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    <?php endforeach; ?>
+</div>
+
 </div>
 
 <!-- Modal Detail Pekerjaan -->
@@ -176,10 +191,9 @@
     </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const jobDetailsModal = document.getElementById('jobDetailsModal');
     jobDetailsModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
@@ -187,53 +201,49 @@
         const jobTitle = button.getAttribute('data-job-title');
         const jobDescription = button.getAttribute('data-job-description');
         const jobClient = button.getAttribute('data-job-client');
-        
+        const jobStatus = button.getAttribute('data-job-status'); // Ambil status pekerjaan
+
         // Set data modal
         document.getElementById('jobTitle').textContent = jobTitle;
         document.getElementById('jobDescription').textContent = jobDescription;
         document.getElementById('jobClient').textContent = jobClient;
-        
+
         const takeJobBtn = document.getElementById('takeJobBtn');
-        takeJobBtn.onclick = function() {
-            // Pastikan modal konfirmasi ada
-            const confirmTakeJobModal = new bootstrap.Modal(document.getElementById('confirmTakeJobModal'));
-            confirmTakeJobModal.show();
+        if (jobStatus == 'open') {
+            takeJobBtn.disabled = false; // Tombol bisa diklik jika pekerjaan berstatus 'open'
+            takeJobBtn.onclick = function() {
+                const confirmTakeJobModal = new bootstrap.Modal(document.getElementById('confirmTakeJobModal'));
+                confirmTakeJobModal.show();
 
-            const confirmTakeJobBtn = document.getElementById('confirmTakeJobBtn');
-            confirmTakeJobBtn.onclick = function() {
-                // Lakukan aksi pengambilan pekerjaan, misalnya mengirim AJAX
-                const xhr = new XMLHttpRequest();
-                xhr.open("POST", "<?= base_url('index.php/freelancer_dashboard/ambil_pekerjaan'); ?>", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                const confirmTakeJobBtn = document.getElementById('confirmTakeJobBtn');
+                confirmTakeJobBtn.onclick = function() {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", "<?= base_url('index.php/freelancer_dashboard/ambil_pekerjaan'); ?>", true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-                // Ambil ID pekerjaan dan ID freelancer (ID freelancer dari session)
-                const freelancerId = '<?= $this->session->userdata('freelancer_id'); ?>';
-
-                // Mengambil job_id yang disimpan di modal
-                const jobId = button.getAttribute('data-job-id');
-                
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState == 4 && xhr.status == 200) {
-                        const response = JSON.parse(xhr.responseText);
-
-                        if (response.status === 'success') {
-                            // Menampilkan toast jika sukses
-                            const toastElement = new bootstrap.Toast(document.getElementById('takeJobToast'));
-                            toastElement.show();
-                        } else {
-                            alert(response.message); // Menampilkan pesan error jika gagal
+                    const freelancerId = '<?= $this->session->userdata('freelancer_id'); ?>';
+                    const jobId = button.getAttribute('data-job-id');
+                    
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.status === 'success') {
+                                const toastElement = new bootstrap.Toast(document.getElementById('takeJobToast'));
+                                toastElement.show();
+                            } else {
+                                alert(response.message);
+                            }
                         }
-                    }
+                    };
+                    xhr.send("job_id=" + jobId + "&freelancer_id=" + freelancerId);
+                    confirmTakeJobModal.hide();
                 };
-
-                // Kirim data yang diperlukan: job_id dan freelancer_id
-                xhr.send("job_id=" + jobId + "&freelancer_id=" + freelancerId);
-                confirmTakeJobModal.hide();  // Sembunyikan modal konfirmasi setelah pengambilan pekerjaan
             };
-        };
+        } else {
+            takeJobBtn.disabled = true; // Tombol dinonaktifkan jika pekerjaan tidak 'open'
+        }
     });
 });
-
 </script>
 
 </body>

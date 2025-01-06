@@ -1,5 +1,6 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
+
 class Client_Dashboard extends CI_Controller {
 
     public function __construct()
@@ -8,8 +9,12 @@ class Client_Dashboard extends CI_Controller {
         $this->load->helper(['url', 'file']); // Muat helper URL dan File
         $this->load->model('Job_model'); // Muat model Job_model
         $this->load->library('session'); // Memuat library session
+        $this->load->library('form_validation'); // Muat library form_validation
         $this->load->model('Notification_model'); // Memuat model Notification_model
     }
+    
+
+    
 
     public function index()
     {
@@ -17,18 +22,30 @@ class Client_Dashboard extends CI_Controller {
         if (!$this->session->userdata('freelancer_id') || $this->session->userdata('role') !== 'client') {
             redirect('signin'); // Redirect jika tidak login atau bukan client
         }
-
+    
         // Ambil semua data pekerjaan dari database
         $data['jobs'] = $this->Job_model->get_all_jobs();
-
+    
+        // Menambahkan status warna untuk setiap pekerjaan
+        foreach ($data['jobs'] as &$job) {
+            if ($job['status'] == 'open') {
+                $job['status_class'] = 'text-success'; // Hijau untuk open
+            } elseif ($job['status'] == 'closed') {
+                $job['status_class'] = 'text-danger'; // Merah untuk closed
+            } else {
+                $job['status_class'] = ''; // Tidak ada warna jika status lainnya
+            }
+        }
+    
         // Ambil daftar gambar dari folder assets/images
         $image_dir = FCPATH . 'assets/images';
         $images = array_diff(scandir($image_dir), ['.', '..']);
         $data['images'] = $images;
-
+    
         // Tampilkan view Client_Dashboard
         $this->load->view('Client_Dashboard', $data);
     }
+
 
     public function create_job()
     {
@@ -36,29 +53,41 @@ class Client_Dashboard extends CI_Controller {
         if (!$this->session->userdata('freelancer_id')) {
             redirect('signin'); // Redirect jika tidak login
         }
-
-        // Ambil data dari form
-        $title = $this->input->post('title');
-        $description = $this->input->post('description');
-        $image_url = $this->input->post('image_url');
-        $client_id = $this->session->userdata('freelancer_id'); // ID client dari session
-
-        // Siapkan data untuk disimpan
-        $data = [
-            'title' => $title,
-            'description' => $description,
-            'image_url' => $image_url,
-            'client_id' => $client_id,
-            'status' => 'open', // Status pekerjaan baru adalah "open"
-        ];
-
-        // Masukkan data pekerjaan baru ke database
-        if ($this->Job_model->add_job($data)) {
-            redirect('client_dashboard'); // Redirect setelah sukses
+    
+        // Validasi input
+        $this->form_validation->set_rules('title', 'Title', 'required');
+        $this->form_validation->set_rules('description', 'Description', 'required');
+        $this->form_validation->set_rules('image_url', 'Image URL', 'required');
+    
+        if ($this->form_validation->run() == FALSE) {
+            // Jika validasi gagal, kembali ke halaman form dengan error
+            $this->load->view('create_job_view');
         } else {
-            echo "Gagal menambahkan pekerjaan baru.";
+            // Ambil data dari form
+            $title = $this->input->post('title');
+            $description = $this->input->post('description');
+            $image_url = $this->input->post('image_url');
+            $client_id = $this->session->userdata('freelancer_id'); // ID client dari session
+    
+            // Siapkan data untuk disimpan
+            $data = [
+                'title' => $title,
+                'description' => $description,
+                'image_url' => $image_url,
+                'client_id' => $client_id,
+                'status' => 'open', // Status pekerjaan baru adalah "open"
+            ];
+    
+            // Masukkan data pekerjaan baru ke database
+            if ($this->Job_model->add_job($data)) {
+                redirect('client_dashboard'); // Redirect setelah sukses
+            } else {
+                echo "Gagal menambahkan pekerjaan baru.";
+            }
         }
     }
+    
+    
 
     public function edit_job()
     {
@@ -149,32 +178,84 @@ class Client_Dashboard extends CI_Controller {
         $this->load->view('inbox_client', $data);
     }
     
-
-    // Fungsi untuk memperbarui status notifikasi
-    public function update_notification_status() {
-        // Ambil data dari POST
+    public function update_notification_status()
+    {
+        // Mendapatkan data dari form
         $notification_id = $this->input->post('notification_id');
+        $freelancer_id = $this->input->post('freelancer_id');
+        $job_id = $this->input->post('job_id');
         $status = $this->input->post('status');
+        
+        // Pastikan status yang diterima atau tidak diterima terupdate
+        $this->db->where('id', $notification_id);
+        $this->db->update('notifications', ['is_accepted' => $status]);
     
-        // Pastikan status yang diterima adalah integer atau boolean
-        $valid_status = ['Menunggu', 'Diterima', 'Tidak diterima'];
-        if (!in_array($status, $valid_status)) {
-            // Status tidak valid, kirimkan respons error
-            echo json_encode(['message' => 'Status tidak valid']);
-            exit;  // Menghentikan eksekusi lebih lanjut
+        // Jika status diterima, update status pekerjaan
+        if ($status == 'Diterima') {
+            $this->db->where('id', $job_id);
+            $this->db->update('jobs', ['status' => 'closed']);
         }
     
-        // Update status notifikasi
-        $result = $this->Notification_model->update_status($notification_id, $status);
-    
-        // Berikan respons sesuai dengan hasil update
-        if ($result) {
-            echo json_encode(['message' => 'Status berhasil diperbarui.']);
-        } else {
-            echo json_encode(['message' => 'Gagal memperbarui status.']);
-        }
+        // Feedback dan redirect
+        $this->session->set_flashdata('message', 'Status berhasil diperbarui!');
+        redirect('client_dashboard/inbox'); // Kembali ke halaman inbox
     }
     
+    
+
+    
+    public function accept_freelancer($job_id, $freelancer_id)
+    {
+        // Memastikan user sudah login sebagai client
+        if (!$this->session->userdata('freelancer_id') || $this->session->userdata('role') !== 'client') {
+            redirect('signin'); 
+        }
+    
+        // Ambil ID client dari session
+        $client_id = $this->session->userdata('freelancer_id');
+    
+        // Validasi bahwa pekerjaan benar milik client yang sedang login
+        $job = $this->Job_model->get_job_by_id($job_id);
+        if (!$job) {
+            $this->session->set_flashdata('error', 'Pekerjaan tidak ditemukan.');
+            redirect('client_dashboard');
+            return;
+        }
+    
+        if ($job['client_id'] != $client_id) {
+            $this->session->set_flashdata('error', 'Anda tidak memiliki izin untuk menerima freelancer ini.');
+            redirect('client_dashboard');
+            return;
+        }
+    
+        // Update status pekerjaan menjadi 'closed' dan simpan freelancer_id
+        $data = [
+            'status' => 'closed',
+            'freelancer_id' => $freelancer_id
+        ];
+    
+        // Debugging: Log sebelum update
+        log_message('debug', 'Mengupdate pekerjaan dengan ID: ' . $job_id . ' dengan status closed.');
+    
+        if ($this->Job_model->update_job($job_id, $data)) {
+            // Log setelah update
+            log_message('debug', 'Status pekerjaan berhasil diperbarui menjadi closed untuk job_id: ' . $job_id);
+    
+            // Notifikasi kepada freelancer
+            $message = "Selamat! Anda diterima untuk pekerjaan: '{$job['title']}'";
+            $this->Notification_model->send_notification($client_id, $freelancer_id, $job_id, $message);
+    
+            // Update status notifikasi menjadi 'Diterima'
+            $this->Notification_model->update_status($job_id, 'Diterima');  // Pastikan job_id dan notification_id dihubungkan dengan benar
+    
+            $this->session->set_flashdata('success', 'Freelancer berhasil diterima dan pekerjaan ditutup.');
+        } else {
+            log_message('error', 'Gagal memperbarui status pekerjaan pada job_id: ' . $job_id);
+            $this->session->set_flashdata('error', 'Gagal memperbarui status pekerjaan.');
+        }
+    
+        redirect('client_dashboard');
+    }
     
 }
 ?>

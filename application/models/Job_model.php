@@ -53,12 +53,11 @@ class Job_model extends CI_Model {
 
 
 
-    // Update data pekerjaan berdasarkan ID
-    public function update_job($job_id, $data)
-    {
+    public function update_job($job_id, $data) {
         $this->db->where('id', $job_id);
-        return $this->db->update('jobs', $data);
+        return $this->db->update('jobs', $data); // Mengupdate pekerjaan
     }
+    
 
      // Fungsi untuk menghapus pekerjaan
     public function delete_job($job_id)
@@ -66,4 +65,5 @@ class Job_model extends CI_Model {
         $this->db->where('id', $job_id);
          return $this->db->delete('jobs'); // Menghapus data pekerjaan berdasarkan ID
     }
+    
 }

@@ -14,24 +14,6 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .notification-unread {
-            background-color: #e0f7fa; /* Warna untuk notifikasi yang belum dibaca */
-        }
-
-        .notification-read {
-            background-color: #ffffff; /* Warna untuk notifikasi yang sudah dibaca */
-        }
-
-        .notification-message {
-            font-size: 1.1rem;
-            color: #333;
-        }
-
-        .notification-time {
-            font-size: 0.8rem;
-            color: #888;
-        }
-
         table th, table td {
             vertical-align: middle;
         }
@@ -69,14 +51,19 @@
                         <td><?= $notification['job_id']; ?></td>
                         <td><?= $notification['status']; ?></td>
                         <td>
-                            <select class="form-select status-dropdown" data-notification-id="<?= $notification['id']; ?>" data-freelancer-id="<?= $notification['freelancer_id']; ?>" data-job-id="<?= $notification['job_id']; ?>">
-                                <option value="Menunggu" <?= ($notification['is_accepted'] == 'Menunggu') ? 'selected' : ''; ?>>Menunggu</option>
-                                <option value="Diterima" <?= ($notification['is_accepted'] == 'Diterima') ? 'selected' : ''; ?>>Diterima</option>
-                                <option value="Tidak diterima" <?= ($notification['is_accepted'] == 'Tidak diterima') ? 'selected' : ''; ?>>Tidak diterima</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-primary btn-sm update-status-btn" data-notification-id="<?= $notification['id']; ?>">Perbarui Status</button>
+                            <!-- Form untuk memperbarui status -->
+                            <form action="<?= site_url('client_dashboard/update_notification_status'); ?>" method="POST">
+                                <input type="hidden" name="notification_id" value="<?= $notification['id']; ?>">
+                                <input type="hidden" name="freelancer_id" value="<?= $notification['freelancer_id']; ?>">
+                                <input type="hidden" name="job_id" value="<?= $notification['job_id']; ?>">
+                                <select class="form-select" name="status" <?= ($notification['is_accepted'] == 'Diterima') ? 'disabled' : ''; ?>>
+                                    <option value="Menunggu" <?= ($notification['is_accepted'] == 'Menunggu') ? 'selected' : ''; ?>>Menunggu</option>
+                                    <option value="Diterima" <?= ($notification['is_accepted'] == 'Diterima') ? 'selected' : ''; ?>>Diterima</option>
+                                    <option value="Tidak diterima" <?= ($notification['is_accepted'] == 'Tidak diterima') ? 'selected' : ''; ?>>Tidak diterima</option>
+                                </select>
+                                <!-- Tombol Submit dalam form yang sama -->
+                                <button type="submit" class="btn btn-primary btn-sm" <?= ($notification['is_accepted'] == 'Diterima') ? 'disabled' : ''; ?>>Perbarui Status</button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -86,40 +73,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>
-    // Fungsi untuk memperbarui status notifikasi
-    $(document).on('click', '.update-status-btn', function() {
-    var button = $(this);
-    var notificationId = button.data('notification-id');
-    var freelancerId = button.closest('tr').find('.status-dropdown').data('freelancer-id');
-    var jobId = button.closest('tr').find('.status-dropdown').data('job-id');
-    var newStatus = button.closest('tr').find('.status-dropdown').val(); // Ambil status yang dipilih
-
-    // Debug: Pastikan status yang dikirim benar
-    console.log('Status yang dipilih:', newStatus);
-
-    // Kirim AJAX untuk memperbarui status
-    $.ajax({
-        url: '<?= site_url("client_dashboard/update_notification_status"); ?>',
-        method: 'POST',
-        data: {
-            notification_id: notificationId,
-            freelancer_id: freelancerId,
-            job_id: jobId,
-            status: newStatus  // Pastikan newStatus adalah salah satu dari 'Menunggu', 'Diterima', atau 'Tidak diterima'
-        },
-        success: function(response) {
-            var data = JSON.parse(response);
-            alert(data.message); // Menampilkan pesan keberhasilan atau kegagalan
-        },
-        error: function() {
-            alert('Gagal memperbarui status.');
-        }
-    });
-});
-
-</script>
 </body>
 </html>

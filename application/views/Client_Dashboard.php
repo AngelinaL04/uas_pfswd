@@ -45,12 +45,11 @@
         }
 
         .section-intro {
-    font-size: 1.5rem; /* Increase font size */
-    text-align: center; /* Center the text */
-    margin-bottom: 40px; /* Add some spacing below the text */
-    color: #333; /* Ensure the text color stands out */
-}
-
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
 
         .btn-post-job {
             background-color: #28a745;
@@ -82,7 +81,6 @@
 </head>
 <body>
 <!-- Navbar -->
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg">
     <div class="container">
         <a class="navbar-brand" href="<?= site_url('home'); ?>">FreelanceGo</a>
@@ -91,7 +89,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <?php if ($this->session->userdata('user_id')): ?> <!-- Check if logged in -->
+                <?php if ($this->session->userdata('user_id')): ?>
                     <li class="nav-item d-flex align-items-center">
                         <span class="nav-link me-2">
                             Selamat datang kembali, <?= htmlspecialchars($this->session->userdata('username') ?? 'Guest'); ?>!
@@ -111,15 +109,13 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="<?= site_url('profile'); ?>">Profile</a></li>
-                    <li><a class="dropdown-item" href="<?= site_url('client_dashboard/inbox'); ?>">Inbox</a></li> <!-- Updated link -->
+                    <li><a class="dropdown-item" href="<?= site_url('client_dashboard/inbox'); ?>">Inbox</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
-
-
 
 <div class="container mt-5">
     <h1 class="section-title">Dashboard Client</h1>
@@ -149,7 +145,13 @@
                     <div class="card-body">
                         <h5 class="card-title"><?= $job['title']; ?></h5>
                         <p class="card-text"><?= $job['description']; ?></p>
-                        <p><strong>Status:</strong> <?= $job['status']; ?></p> <!-- Menampilkan status pekerjaan -->
+                        <p><strong>Status:</strong> 
+    <span class="<?= $job['status_class']; ?>">
+        <?= ucfirst($job['status']); ?>
+    </span>
+</p>
+
+
                         <!-- Tombol Edit -->
                         <button 
                             class="btn btn-warning" 
@@ -158,7 +160,8 @@
                             data-id="<?= $job['id']; ?>" 
                             data-title="<?= $job['title']; ?>" 
                             data-description="<?= $job['description']; ?>" 
-                            data-image="<?= $job['image_url']; ?>">
+                            data-image="<?= $job['image_url']; ?>"
+                            data-status="<?= $job['status']; ?>"> <!-- Menambahkan status ke modal -->
                             Edit
                         </button>
                         <!-- Tombol Hapus -->
@@ -176,7 +179,6 @@
         <?php endif; ?>
     </div>
 </div>
-
 
     <!-- Modal Form untuk Post Pekerjaan Baru -->
     <div class="modal fade" id="postJobModal" tabindex="-1" role="dialog" aria-labelledby="postJobModalLabel" aria-hidden="true">
@@ -245,7 +247,15 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <div class="form-group">
+                            <label for="editJobStatus">Status</label>
+                            <select class="form-control" id="editJobStatus" name="status">
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Pekerjaan</button>
                     </form>
                 </div>
             </div>
@@ -263,12 +273,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus pekerjaan <strong id="deleteJobTitle"></strong>?</p>
-                </div>
-                <div class="modal-footer">
+                    <p>Apakah Anda yakin ingin menghapus pekerjaan ini?</p>
                     <form action="<?= site_url('client_dashboard/delete_job'); ?>" method="POST">
                         <input type="hidden" id="deleteJobId" name="id">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-danger">Hapus</button>
                     </form>
                 </div>
@@ -276,32 +283,40 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"></script>
     <script>
-        // Mengisi data ke dalam modal Edit
+        // Edit Job Modal
         var editJobModal = document.getElementById('editJobModal');
         editJobModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget; // Tombol yang diklik
-            var id = button.getAttribute('data-id');
-            var title = button.getAttribute('data-title');
-            var description = button.getAttribute('data-description');
-            var image = button.getAttribute('data-image');
+            var button = event.relatedTarget; // Button that triggered the modal
+            var jobId = button.getAttribute('data-id');
+            var jobTitle = button.getAttribute('data-title');
+            var jobDescription = button.getAttribute('data-description');
+            var jobImage = button.getAttribute('data-image');
+            var jobStatus = button.getAttribute('data-status');
 
-            // Mengisi data ke input form
-            editJobModal.querySelector('#editJobId').value = id;
-            editJobModal.querySelector('#editJobTitle').value = title;
-            editJobModal.querySelector('#editJobDescription').value = description;
-            editJobModal.querySelector('#editJobImage').value = image;
+            var modalJobId = editJobModal.querySelector('#editJobId');
+            var modalJobTitle = editJobModal.querySelector('#editJobTitle');
+            var modalJobDescription = editJobModal.querySelector('#editJobDescription');
+            var modalJobImage = editJobModal.querySelector('#editJobImage');
+            var modalJobStatus = editJobModal.querySelector('#editJobStatus');
+
+            modalJobId.value = jobId;
+            modalJobTitle.value = jobTitle;
+            modalJobDescription.value = jobDescription;
+            modalJobImage.value = jobImage;
+            modalJobStatus.value = jobStatus;
         });
 
-        // Mengisi data ke dalam modal Hapus
+        // Delete Job Modal
         var deleteJobModal = document.getElementById('deleteJobModal');
         deleteJobModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var title = button.getAttribute('data-title');
-            deleteJobModal.querySelector('#deleteJobId').value = id;
-            deleteJobModal.querySelector('#deleteJobTitle').textContent = title;
+            var jobId = button.getAttribute('data-id');
+            var modalJobId = deleteJobModal.querySelector('#deleteJobId');
+            modalJobId.value = jobId;
         });
     </script>
 </body>
