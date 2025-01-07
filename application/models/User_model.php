@@ -22,24 +22,21 @@ class User_model extends CI_Model {
         return $query->row_array();  // Mengembalikan data user berdasarkan email
     }
 
-    // Memperbarui data user berdasarkan ID (username, email, password, profile_picture)
-    public function update_user($freelancer_id, $username, $email, $password, $profile_picture)
-    {
+    public function update_user($freelancer_id, $name, $password, $profile_picture) {
         $data = [
-            'username' => $username,
-            'email' => $email,
-            'profile_picture' => $profile_picture,  // Menambahkan field profile_picture
+            'username' => $name,
+            'profile_picture' => $profile_picture
         ];
-
-        // Jika password diubah, lakukan hash dan masukkan ke data
-        if (!empty($password)) {
-            $data['password'] = password_hash($password, PASSWORD_BCRYPT);
+    
+        // Jika password tidak null, masukkan password baru
+        if ($password !== null) {
+            $data['password'] = $password;
         }
-
-        // Menyimpan perubahan ke database
+    
         $this->db->where('id', $freelancer_id);
         return $this->db->update('users', $data);
     }
+    
 
     // Cek apakah email sudah terdaftar
     public function check_email_exists($email)

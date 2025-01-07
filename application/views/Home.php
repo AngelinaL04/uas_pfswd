@@ -83,7 +83,7 @@
     <div class="row justify-content-center">
         <div class="col-md-12 image-container">
             <!-- Gambar di sini, bisa diganti dengan gambar apapun -->
-            <img src="<?= base_url('assets/images/1665406497-FreelancerGo_main.webp'); ?>" alt="Ilustrasi Web Service">
+            <img src="<?= base_url('assets/images/logo_aplikasi.png'); ?>" alt="Ilustrasi Web Service">
         </div>
     </div>
 </div>

@@ -59,32 +59,32 @@ class Profile extends CI_Controller {
         if ($freelancer_id) {
             // Ambil data dari form
             $name = $this->input->post('name');
-            $email = $this->input->post('email');
             $password = $this->input->post('password');
             
             // Ambil profile_picture yang dipilih
             $profile_picture = $this->input->post('profile_picture'); // Jika gambar dari dropdown
     
-            // Jika password diisi, hash password sebelum disimpan
-            if (!empty($password)) {
-                $password = password_hash($password, PASSWORD_BCRYPT);  // Hash password
-            } else {
+            // Jika password diisi, langsung gunakan password yang dimasukkan tanpa enkripsi
+            if (empty($password)) {
                 $password = null;  // Jika tidak ada password baru, tetap null
             }
-
-            // Lakukan update data pengguna
-            $updated = $this->User_model->update_user($freelancer_id, $name, $email, $password, $profile_picture);
     
+            // Lakukan update data pengguna tanpa mengupdate email
+            $updated = $this->User_model->update_user($freelancer_id, $name, $password, $profile_picture);
+        
             if ($updated) {
                 $this->session->set_flashdata('success', 'Profil berhasil diperbarui!');
                 redirect('profile');
             } else {
                 $this->session->set_flashdata('error', 'Terjadi kesalahan saat memperbarui profil.');
-            redirect('profile/edit');
+                redirect('profile/edit');
             }
         } else {
             redirect('signin');
         }
     }
+    
+    
+    
 }
 

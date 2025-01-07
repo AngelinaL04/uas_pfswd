@@ -18,14 +18,16 @@ class Client_Dashboard extends CI_Controller {
 
     public function index()
     {
-        // Memastikan user sudah login sebagai client
         if (!$this->session->userdata('freelancer_id') || $this->session->userdata('role') !== 'client') {
-            redirect('signin'); // Redirect jika tidak login atau bukan client
+            // Jika session tidak ada atau role salah, tampilkan pesan atau redirect
+            $this->session->set_flashdata('error', 'Silakan login sebagai client');
+            redirect('signin');
         }
+        
     
-        // Ambil semua data pekerjaan dari database
+        // Ambil semua data pekerjaan dari database, yang statusnya bukan 'completed'
         $data['jobs'] = $this->Job_model->get_all_jobs();
-    
+        
         // Menambahkan status warna untuk setiap pekerjaan
         foreach ($data['jobs'] as &$job) {
             if ($job['status'] == 'open') {
@@ -45,6 +47,7 @@ class Client_Dashboard extends CI_Controller {
         // Tampilkan view Client_Dashboard
         $this->load->view('Client_Dashboard', $data);
     }
+    
 
 
     public function create_job()
@@ -101,6 +104,7 @@ class Client_Dashboard extends CI_Controller {
         $title = $this->input->post('title');
         $description = $this->input->post('description');
         $image_url = $this->input->post('image_url');
+        $status = $this->input->post('status'); // Ambil status dari form (misalnya 'completed')
         $client_id = $this->session->userdata('freelancer_id'); // ID client dari session
     
         // Pastikan pekerjaan tersebut milik client yang sedang login
@@ -117,15 +121,20 @@ class Client_Dashboard extends CI_Controller {
             'title' => $title,
             'description' => $description,
             'image_url' => $image_url,
+            'status' => $status, // Update status jika ada perubahan
         ];
     
         // Perbarui data pekerjaan di database
         if ($this->Job_model->update_job($job_id, $data)) {
-            redirect('client_dashboard'); // Redirect setelah sukses
+            // Jika status diubah menjadi 'completed', pekerjaan tidak akan tampil lagi
+            if ($status == 'completed') {
+                redirect('client_dashboard'); // Redirect ke dashboard client jika status sudah diupdate
+            }
         } else {
             echo "Gagal memperbarui pekerjaan.";
         }
     }
+    
     
     public function delete_job()
     {
@@ -256,6 +265,7 @@ class Client_Dashboard extends CI_Controller {
     
         redirect('client_dashboard');
     }
+    
     
 }
 ?>

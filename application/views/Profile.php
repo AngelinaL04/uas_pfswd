@@ -71,8 +71,6 @@
     </div>
 </nav>
 
-
-
 <div class="container mt-5 profile-info">
     <h2>Profil Pengguna</h2>
     <div class="card p-4">
@@ -83,8 +81,7 @@
             </div>
             <div class="col-md-9">
                 <p><strong>Nama:</strong> <?= htmlspecialchars($user['username']); ?></p>
-                <p><strong>Email:</strong> <?= htmlspecialchars($user['email']); ?></p>
-                <p><strong>Deskripsi:</strong> <?= htmlspecialchars($user['description'] ?? 'Belum ada deskripsi'); ?></p>
+                <p><strong>Password:</strong> <em>********</em></p> <!-- Menampilkan placeholder untuk password -->
                 <a href="<?= site_url('profile/edit'); ?>" class="btn btn-primary">Edit Profil</a>
             </div>
         </div>
