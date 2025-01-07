@@ -247,16 +247,20 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="editJobStatus">Status</label>
-                            <select class="form-control" id="editJobStatus" name="status">
-                                <option value="open">Open</option>
-                                <option value="closed">Closed</option>
-                                <option value="completed">Completed</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Pekerjaan</button>
-                    </form>
+                        <form action="<?= site_url('client_dashboard/update_status'); ?>" method="POST">
+    <div class="form-group">
+        <label for="editJobStatus">Status Pekerjaan</label>
+        <select class="form-control" id="editJobStatus" name="status">
+            <option value="completed" <?= $job['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
+        </select>
+    </div>
+
+    <input type="hidden" name="job_id" value="<?= $job['id']; ?>">
+    
+    <button type="submit" class="btn btn-primary">Update Pekerjaan</button>
+</form>
+
+
                 </div>
             </div>
         </div>

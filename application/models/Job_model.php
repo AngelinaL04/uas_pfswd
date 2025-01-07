@@ -6,17 +6,18 @@ class Job_model extends CI_Model {
         parent::__construct();
         $this->load->database();
     }
+// Ambil semua pekerjaan yang statusnya bukan 'completed'
+public function get_all_jobs()
+{
+    $this->db->select('jobs.*, users.username');
+    $this->db->from('jobs');
+    $this->db->join('users', 'jobs.client_id = users.id');
+    $this->db->where('jobs.status !=', 'completed'); // Menambahkan filter status
+    $this->db->order_by('jobs.created_at', 'DESC');
+    $query = $this->db->get();
+    return $query->result_array();
+}
 
-    // Ambil semua pekerjaan
-    public function get_all_jobs()
-    {
-        $this->db->select('jobs.*, users.username');
-        $this->db->from('jobs');
-        $this->db->join('users', 'jobs.client_id = users.id');
-        $this->db->order_by('jobs.created_at', 'DESC');
-        $query = $this->db->get();
-        return $query->result_array();
-    }
 
     // Tambahkan pekerjaan baru
     public function add_job($data)
@@ -65,5 +66,6 @@ class Job_model extends CI_Model {
         $this->db->where('id', $job_id);
          return $this->db->delete('jobs'); // Menghapus data pekerjaan berdasarkan ID
     }
+
     
 }

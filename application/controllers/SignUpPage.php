@@ -40,25 +40,21 @@ class SignUpPage extends CI_Controller {
             redirect('SignUpPage');
         }
 
-        // Hash password sebelum disimpan
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
         // Data yang akan disimpan ke database
         $user_data = [
             'username' => $username,
             'email' => $email,
-            'password' => $hashed_password,
+            'password' => $password,  // Simpan password apa adanya tanpa enkripsi
             'role' => $role,  // Role 'client' atau 'freelancer'
         ];
 
-// Menyimpan data ke database
-if ($this->User_model->create_user($user_data)) {
-    $this->session->set_flashdata('success', 'Signup berhasil! Silakan login.');
-    redirect('signin');  // Mengarahkan ke halaman login setelah berhasil signup
-} else {
-    $this->session->set_flashdata('error', 'Terjadi kesalahan, coba lagi.');
-    redirect('signup');  // Kembali ke halaman signup jika gagal
-}
-
+        // Menyimpan data ke database
+        if ($this->User_model->create_user($user_data)) {
+            $this->session->set_flashdata('success', 'Signup berhasil! Silakan login.');
+            redirect('signin');  // Mengarahkan ke halaman login setelah berhasil signup
+        } else {
+            $this->session->set_flashdata('error', 'Terjadi kesalahan, coba lagi.');
+            redirect('signup');  // Kembali ke halaman signup jika gagal
+        }
     }
 }

@@ -47,11 +47,14 @@
         </div>
 
         <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" value="<?= $user['email']; ?>" required>
+            <label for="password" class="form-label">Password Baru</label>
+            <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password baru" required>
         </div>
 
-        <!-- Bagian password dihapus sesuai permintaan -->
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">Konfirmasi Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Konfirmasi password baru" required>
+        </div>
 
         <div class="mb-3">
             <label for="profile_picture" class="form-label">Pilih Foto Profil</label>
@@ -79,6 +82,7 @@
             </div>
         </div>
 
+        <!-- Tombol Simpan Perubahan -->
         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
     </form>
 </div>

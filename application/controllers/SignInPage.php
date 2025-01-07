@@ -45,8 +45,8 @@ class SignInPage extends CI_Controller {
         $user = $this->User_model->get_user_by_email($email);
         
         if ($user) {
-            // Periksa apakah password yang dimasukkan sesuai dengan hash password di database
-            if (password_verify($entered_password, $user['password'])) {
+            // Periksa apakah password yang dimasukkan sama dengan password di database
+            if ($entered_password === $user['password']) {
                 // Periksa apakah role yang dipilih sesuai dengan role pengguna di database
                 if ($user['role'] !== $role) {
                     // Update role di database jika berbeda
